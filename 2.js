@@ -2,65 +2,11 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
 let usersDivEl;
 let postsDivEl;
-let kommentsDivEl;
 let loadButtonEl;
 
 
+function onClickPosts() {
 
-function getCommentsData(comments) {
-    const unorderedList = document.createElement('ul');
-
-    for (let i = 0; i < comments.length; i++) {
-        const comment = comments[i];
-
-
-
-
-        //why postID = comment ID?
-        const strong = document.createElement('strong');
-        strong.textContent = comment.name;
-
-        const p = document.createElement('p');
-        p.appendChild(strong);
-        p.appendChild(document.createTextNode(`: ${comment.body}`));
-
-        //creating list element
-        const li = document.createElement('li');
-        li.appendChild(p);
-
-        unorderedList.appendChild(li);
-        //postID to hide comment
-        const postIdAttr = document.createAttribute('hideId');
-        postIdAttr.textContent = comment.postId;
-        unorderedList.setAttributeNode(postIdAttr);
-
-    }
-    return unorderedList;
-}
-
-function onCommentsReceived() {
-    //loadButtonPost.remove();
-    commentsDivEl.style.display = 'block';
-
-
-    const text = this.responseText;
-    const comments = JSON.parse(text);
-
-    const div = document.getElementById('comments-content');
-    div.appendChild(getCommentsData(comments)); // ezzel fogjuk beletenni valalmit a IDE (index.html)
-}
-
-
-//if you click on Posts, this will execute
-function onLoadComments() {
-    const el = this;
-    const postId = el.getAttribute('data-post-id');
-
-
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', onCommentsReceived);
-    xhr.open('GET', BASE_URL + '/comments?postId=' + postId);
-    xhr.send();
 }
 
 
@@ -71,13 +17,6 @@ function createPostsList(posts) {
     for (let i = 0; i < posts.length; i++) {
         const post = posts[i];
 
-        //postID data
-        const dataPostIdAttr = document.createAttribute('data-post-id');
-        dataPostIdAttr.value = post.id; // or .id IDK
-
-
-
-
         // creating paragraph
         const strongEl = document.createElement('strong');
         strongEl.textContent = post.title;
@@ -85,20 +24,10 @@ function createPostsList(posts) {
         const pEl = document.createElement('p');
         pEl.appendChild(strongEl);
         pEl.appendChild(document.createTextNode(`: ${post.body}`));
-        pEl.setAttribute("id", "load-komments");
-
-        //clickable button to show comments
-        const button = document.createElement('button');
-        //button.textContent = pEl; //PROBLEM?
-        button.textContent = post.body;
-        button.setAttributeNode(dataPostIdAttr);
-        button.addEventListener('click', onLoadComments);
-        button.appendChild(strongEl);
-        button.appendChild(pEl);
 
         // creating list item
         const liEl = document.createElement('li');
-        liEl.appendChild(button);
+        liEl.appendChild(pEl);
 
         ulEl.appendChild(liEl);
     }
@@ -162,7 +91,7 @@ function createUsersTableBody(users) {
         const buttonEl = document.createElement('button');
         buttonEl.textContent = user.name;
         buttonEl.setAttributeNode(dataUserIdAttr);
-        buttonEl.addEventListener('click', onLoadPosts);//CHANGE onLoadPosts or onLoadAlbums
+        buttonEl.addEventListener('click', onLoadPosts);
 
         const nameTdEl = document.createElement('td');
         nameTdEl.appendChild(buttonEl);
@@ -202,56 +131,9 @@ function onLoadUsers() {
     xhr.send();
 }
 
-// komments
-function onLoadKomments() { //onLoadPosts
-
-    const el = this;
-    const postId = el.getAttribute('data-post-id');
-
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('load', onKommentsReceived);//MISSING onKommentsReceived
-    xhr.open('GET', BASE_URL + '/comments');
-    xhr.send();
-}
-
-function onKommentsReceived() { //<button id="load_posts">
-    const text = this.responseText;
-    const komments = JSON.parse(text);
-
-    const divEl = document.getElementById('komments-content');
-    while (divEl.firstChild) {
-        divEl.removeChild(divEl.firstChild);
-    }
-    divEl.appendChild(createKommentsList(komments));
-}
-
-function createKommentsList(komments) {
-    const ul = document.createElement('ul');
-
-    for (var i = 0; i < komments.length; i++) {
-        const komment = komments[i];
-
-        //komment simple
-        const strongEl = document.createElement('strong');
-        strongEl.textContent = komment.Name;
-        
-        const p = document.createElement('p');
-        p.appendChild(strongEl);
-        p.appendChild(document.createTextNode(`: ${komment.Body}`));
-
-        const li = document.createElement('li');
-        li.appendChild(p);
-
-        ul.appendChild(li);
-    }
-
-    return ul;
-}
-
 document.addEventListener('DOMContentLoaded', (event) => {
     usersDivEl = document.getElementById('users');
     postsDivEl = document.getElementById('posts');
-    kommentsDivEl = document.getElementById('komments');
     loadButtonEl = document.getElementById('load-users');
     loadButtonEl.addEventListener('click', onLoadUsers);
 });
