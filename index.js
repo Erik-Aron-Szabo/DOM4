@@ -3,12 +3,130 @@ const BASE_URL = 'https://jsonplaceholder.typicode.com';
 let usersDivEl;
 let postsDivEl;
 let commentsDivEl;
+let albumsDivEl;
+let photosDivEl;
 let loadButtonEl;
-let loadButtonPost;
+//let loadButtonPost;
+//let loadButtonAlbum;
 
+
+//displaying photos
+function createPhotosList(photos) {
+    const ul = document.createElement('ul');
+
+    for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+
+        const strong = document.createElement('strong');
+        strong.textContent = photo.title;
+
+        //how to display photo? form URL
+        const image = document.createElement('img');
+        const src = document.createAttribute('src');
+        src.value = photo.url;
+        image.setAttributeNode(src);
+        strong.appendChild(image);
+
+        //creating list item
+        const li = document.createElement('li');
+        li.appendChild(strong);
+
+        ul.appendChild(li);
+        
+    }
+    return ul;
+}
+
+
+function onPhotosReceived(){
+    photosDivEl.style.display = 'block';
+
+    const text = this.responseText;
+    const photos = JSON.parse(text);
+
+    const div = document.getElementById('photos-content');
+    div.appendChild(createPhotosList(photos));
+}
+
+
+//loading pictures onclick album
+function onLoadPhotos(){
+    const el  = this;
+    const albumId = el.getAttribute('data-album-id');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', BASE_URL + '/photos?albumId=' + albumId); 
+    xhr.addEventListener('load', onPhotosReceived);
+    xhr.send();
+
+}
+
+
+
+//creating the display of albums
+function createAlbumsList(albums){
+    const ul = document.createElement('ul');
+
+    for (let i = 0; i < albums.length; i++) {
+        const album = albums[i];
+        
+        //data-album-id (for the pictures), like comments
+        const albumIdAttr = document.createAttribute('data-album-id');
+        albumIdAttr.textContent = album.id;
+
+        // const strong = document.createElement('strong');
+        // strong.textContent = album.title;
+
+        //button to load Pictures
+        const button = document.createElement('button');
+        button.textContent = album.title; //MAYBE change it to 'album'
+        button.setAttributeNode(albumIdAttr);
+        //button.appendChild(strong);
+        button.addEventListener('click', onLoadPhotos);
+
+        //list item
+        const li = document.createElement('li');
+        li.appendChild(button);
+
+        ul.appendChild(li);
+
+    }
+    return ul;
+}
+
+
+
+//loading albums
+function onAlbumsReceived(){
+    albumsDivEl.style.display = 'block';
+
+    const text = this.responseText;
+    const albums = JSON.parse(text);
+
+    const divEl = document.getElementById('albums-content');
+    while (divEl.firstChild) {
+        divEl.removeChild(divEl.firstChild);
+    }
+    divEl.appendChild(createAlbumsList(albums));
+}
+
+
+//albums userId, id, title
+function onLoadAlbums(){
+    const el = this;
+    const userId = el.getAttribute('data-user-id');
+
+    const xhr = new XMLHttpRequest();
+    xhr.addEventListener('load', onAlbumsReceived);
+    xhr.open('GET', BASE_URL + '/albums?userId=' + userId);
+    xhr.send();
+}
+
+
+//this function needs to be implemented
 function hideComment(unorderedList){
     unorderedList.style.display = none;
-    
+
 }
 
 function getCommentsData(comments) {
@@ -165,7 +283,7 @@ function createUsersTableBody(users) {
         const buttonEl = document.createElement('button');
         buttonEl.textContent = user.name;
         buttonEl.setAttributeNode(dataUserIdAttr);
-        buttonEl.addEventListener('click', onLoadPosts);
+        buttonEl.addEventListener('click', onLoadAlbums);//CHANGE onLoadPosts or onLoadAlbums
 
         const nameTdEl = document.createElement('td');
         nameTdEl.appendChild(buttonEl);
@@ -209,6 +327,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
     usersDivEl = document.getElementById('users');
     postsDivEl = document.getElementById('posts');
     commentsDivEl = document.getElementById('comments');
+    albumsDivEl = document.getElementById('albums');
+    photosDivEl = document.getElementById('photos');
     loadButtonEl = document.getElementById('load-users');
     loadButtonEl.addEventListener('click', onLoadUsers);
     //loadButtonPost = document.getElementById('postbutton');
